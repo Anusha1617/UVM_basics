@@ -52,25 +52,25 @@
 
 	//------------------------APB_MEMORY CLOCKING BLOCKS -------------------//    
 		clocking Mem_cb_driver@(posedge pclk_i);
-		input  #1 m_paddr_o,m_pwdata_o,m_psel_o,m_pwrite_o,m_penable_o;
+		input  #1 m_paddr_o,m_pwdata_o,m_psel_o,m_pwrite_o,m_penable_o,int_o;
 		output  #0 m_pready_i,m_prdata_i;
 		endclocking
 
 		clocking Mem_cb_monitor@(posedge pclk_i);
-		input  #0 m_paddr_o,m_pwdata_o,m_psel_o,m_pwrite_o,m_penable_o;
+		input  #0 m_paddr_o,m_pwdata_o,m_psel_o,m_pwrite_o,m_penable_o,int_o;
 		input  #0 m_pready_i,m_prdata_i;
 		endclocking
 
 	//--------------------------TX_MAC CLOCKING BLOCKS ------------------------//
 
 		clocking Tx_cb_driver@(posedge MTxClk );
-		    input #1 MTxEn,MTxD,MTxErr;
+		    input #1 MTxEn,MTxD,MTxErr,int_o;
 		output #0 MCrS; 
 	    endclocking
 
 		clocking Tx_cb_monitor@(posedge MTxClk);
 		    input #0 MTxEn,MTxD,MTxErr;
-		input #0 MCrS; 
+		input #0 MCrS,int_o; 
 		endclocking
 
 	endinterface
