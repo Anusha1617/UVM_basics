@@ -1,8 +1,6 @@
-	interface APB_Interface (input  pclk_i,MTxClk);
+	interface APB_Interface (input  pclk_i,MTxClk,prstn_i);
 
 	//----------APB SLAVE -------//
-	logic pclk_i;
-	logic prstn_i;
 	logic [31:0] paddr_i;
 	logic [31:0]pwdata_i;
 	logic psel_i;
