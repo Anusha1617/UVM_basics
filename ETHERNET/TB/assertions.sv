@@ -1,0 +1,4 @@
+all_signals_naming_convention.sv
+mcs_dv05_ethernet_project_assertions.sv
+mcs_dv05_ethernet_project_top_config.sv
+mcs_dv05_ethernet_project_top.sv
