@@ -1,0 +1,5 @@
+mcs_dv05_ethernet_project_agent.sv
+mcs_dv05_ethernet_project_driver.sv
+mcs_dv05_ethernet_project_monitor.sv
+mcs_dv05_ethernet_project_op_monitor.sv
+mcs_dv05_ethernet_project_sequencer.sv
