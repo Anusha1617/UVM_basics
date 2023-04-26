@@ -20,8 +20,6 @@ class Host_Seq1 extends uvm_sequence #(Host_Seq_item);
 
     enum {TX_BD_NUM='h20,MIIADDRESS='h30,MAC_ADDR0='h40,MAC_ADDR1='h44,INT_MASK='h08,INT_SOURCE='h04,MODER='h00}Reg_addr;
 
-    typedef enum {a=46,b=47,c=48,d=500,e=800,f=1000,g=1300,h=1500}ndt;
-    ndt payload_lengh;
 
 
 	//===CONSTRUCTOR====//
@@ -34,17 +32,16 @@ task pre_body();
 	h_config=Config_class::type_id::create("h_config");
 	uvm_config_db #(Config_class) :: get(null,"","config_class",h_config);
 	req=Host_Seq_item::type_id::create("req");
-//		NO_OF_TX_BDs=std::randomize;
-		NO_OF_TX_BDs=$urandom_range(1,128);
-		NO_OF_TX_BDs=1;
+		NO_OF_TX_BDs=$urandom_range(1,128);  // randomizing the number of BD's
 endtask
 
 	task body();
-	 RESET();
+//	 RESET();   // check n keep
+	 MODER_CONFIGURATION(PAD,HUGEN,FULLD,LOOPBCK,IFG,PRO,BRO,NOPRE,0,RXEN);		// Making TXEN==0 at the starting of the configuration
 	 MAC_ADDR0_CONFIGURATION();
 	 MAC_ADDR1_CONFIGURATION();	 
 	 MIIADDRESS_CONFIGURATION();
-	 TX_BD_NUM_CONFIGURATION(NO_OF_TX_BDs);
+	 TX_BD_NUM_CONFIGURATION(NO_OF_TX_BDs); // randomizing NO_OF_TX_BDs number in pre body
 	 TXBDs_CONFIGURATION();
 	 INT_MASK_CONFIGURATION(RXE_M,RXF_M,TXE_M,TXB_M);	
 	 INT_SOURCE_CONFIGURATION(RXE,RXB,TXE,TXB);
@@ -57,7 +54,7 @@ endtask
 	
 	    task RESET();
 		start_item(req);
-			assert (req.randomize() with {prstn_i==0; psel_i==1;} )
+			assert (req.randomize() with {prstn_i==0; } )
 		finish_item(req);	
 	endtask
 	
@@ -135,25 +132,16 @@ endtask
 	endtask	
 	task MODER_CONFIGURATION(bit  PAD=1,HUGEN=0,FULLD=0,LOOPBCK=0,IFG=0,PRO=0,BRO=0,NOPRE=0,TXEN=1,RXEN=0);
 			start_item(req);
-			assert (req.randomize() with {paddr_i==MODER; pwdata_i==32'd2;}/*{16'b0,PAD,HUGEN,3'b0,FULLD,2'b0,LOOPBCK,IFG,PRO,1'b0,BRO,NOPRE,TXEN,RXEN};}*/);
-			//$display("MODER in SEQ = PAD=%0d \n HUGEN=%0d \n FULLD=%0d \n LOOPBCK=%0d \n IFG=%0d \n PRO=%0d \n BRO=%0d \n NOPRE=%0d \n TXEN=%0d \n RXEN=%0d \n",PAD,HUGEN,FULLD,LOOPBCK,IFG,PRO,BRO,NOPRE,TXEN,RXEN);
+			assert (req.randomize() with {paddr_i==MODER; pwdata_i=={16'b0,PAD,HUGEN,3'b0,FULLD,2'b0,LOOPBCK,IFG,PRO,1'b0,BRO,NOPRE,TXEN,RXEN};});
 			finish_item(req);
 	endtask
 	
 	
 	task END_CONFIGURATION();
 			start_item(req);
-			assert (req.randomize() with {psel_i==0;  paddr_i==0;   penable_i==0; pwdata_i==10;  }) 
+			assert (req.randomize() with {psel_i==0;  paddr_i==0;   penable_i==0; pwdata_i==0;  }) 
 			finish_item(req);
 	endtask	
-	
-		
-	task INT_O_CONFIGURATION();
-			start_item(req);
-			assert (req.randomize() with {psel_i==1; paddr_i==INT_SOURCE;   pwdata_i==32'hf;  }) 
-			finish_item(req);
-	endtask	
-	
 	
 		
     task READ();
