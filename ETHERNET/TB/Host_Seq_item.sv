@@ -1,7 +1,5 @@
 class Host_Seq_item extends uvm_sequence_item;
 
-	//===FACTORY REGISTRATION====//
-	//`uvm_object_utils(Host_Seq_item)
 
 	//===DECLARATION OF SIGNALS===//	
 	rand bit penable_i,pwrite_i,psel_i;
@@ -9,6 +7,7 @@ class Host_Seq_item extends uvm_sequence_item;
 	bit pready_o,int_o,prstn_i;
 	bit [31:0] prdata_o;
 
+	rand bit [16] No_of_bytes_of_Payload;
 
 
 `uvm_object_utils_begin(Host_Seq_item)
@@ -38,25 +37,40 @@ class Host_Seq_item extends uvm_sequence_item;
 		if(paddr_i==MIIADDRESS)
 				pwdata_i[31:5]==0;  // reserved bits 
 		if(paddr_i==MAC_ADDR1)
-				pwdata_i[31:16]==0;  // reserved bits 		
+				pwdata_i[31:16]==16'b0;  // reserved bits 		
 		if(paddr_i==TX_BD_NUM)
 				pwdata_i[31:16]==0;  // reserved bits 
 		soft pwrite_i==1;				
 		soft penable_i==0;						
 		soft psel_i==1;	
-		//else if(paddr_i%4==0)
-			if(psel_i==1)
+		if(psel_i==1)
                 penable_i==0;	
-							
-        
+// ---------------------- [TXBD or RXBD] payload Length constraint ------------------------------------------//
+			`ifdef HUGEN_PACKET  // executed only when it is + define + HUGEN_PACKET used in Makefile
+					if (paddr_i>=400 && paddr_i%8==0) 
+					No_of_bytes_of_Payload inside {[1501:2000]};	
+			`endif 					
+			`elsif SMALL_PACKET
+					if (paddr_i>=400 && paddr_i%8==0) 
+					No_of_bytes_of_Payload inside {[1:45]};	
+			`endif 
+			`elsif 	OVERSIZED_PACKET
+					if (paddr_i>=400 && paddr_i%8==0) 
+					No_of_bytes_of_Payload inside {[2001:65536]};					
+			`endif 
+			`else // if nothing is  defined then the else part is executed
+					if (paddr_i>=400 && paddr_i%8==0) 
+					No_of_bytes_of_Payload inside {[46:1500]};		
+			`endif 
 		}
 
-	function void post_randomize();
-//		case (paddr_i)
-//		TX_BD_NUM : begin pwdata_i=pwdata_i%127; end  
-		//MIIADDRESS
-//		endcase
+
+		function void post_randomize();
+			if(paddr_i>=400 && paddr_i%8==0)
+			begin
+				pwdata_i[31:16]=No_of_bytes_of_Payload;
+			end
+		endfunction
 		
-	endfunction	
-	
+
 endclass
