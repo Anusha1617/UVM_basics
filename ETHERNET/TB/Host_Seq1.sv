@@ -10,7 +10,8 @@ class Host_Seq1 extends  Base_Seq;
 //inside body task we will set the fields as per Test_Case and then  call the tasks to randomize other variables
 // see the Base_Seq(parent) sequence to know the tasks prototype
 	task body();
-
+// starting offset
+	offset=0;  //  means it will start from 'h400
 // NO_OF_TX_BDs_Configuration
     start_num=10;
     end_num=20;
