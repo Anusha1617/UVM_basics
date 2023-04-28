@@ -37,7 +37,7 @@ class Mem_input_monitor extends uvm_monitor;
 		//--------------- ANalysis port instantiation -------------//
 		m_i_port=new("m_i_port",this);
 		
-		req=Mem_seq_item::type_id::create("req");
+		
 		
 	endfunction
 	
@@ -46,6 +46,8 @@ class Mem_input_monitor extends uvm_monitor;
 		super.run_phase(phase);
 		
 		forever@(Mem_vif.Mem_cb_monitor)	begin
+			
+			req=Mem_seq_item::type_id::create("req");
 			
 			req.m_paddr_o 	 = Mem_vif.Mem_cb_monitor.m_paddr_o ;
 			req.m_pwdata_o	 = Mem_vif.Mem_cb_monitor.m_pwdata_o ;
@@ -57,20 +59,23 @@ class Mem_input_monitor extends uvm_monitor;
 			req.m_pready_i	 = Mem_vif.Mem_cb_monitor.m_pready_i ;
 			req.m_prdata_i	 = Mem_vif.Mem_cb_monitor.m_prdata_i ;
 			
+			m_i_port.write(req);
+			
+			
 			//req.print();set_mem;
 			
-			if(!Mem_vif.Mem_cb_monitor.prstn_i)	begin
+			/*if(!Mem_vif.Mem_cb_monitor.prstn_i)	begin
 				Payload ={};
 				pkt_in_progress=0;
 				Rx_length=0;r_p=0;
 			end
-			else	rx_packatization;
+			else	rx_packatization;*/
 		end
 		
 	endtask
 	
 	
-	task rx_packatization;
+	/*task rx_packatization;
 		//for storing values in memory during writing i.e. rx mode
 			if(Mem_vif.Mem_cb_monitor.m_psel_o && Mem_vif.Mem_cb_monitor.m_penable_o && Mem_vif.Mem_cb_monitor.m_pwrite_o && Mem_vif.Mem_cb_monitor.m_pready_i)	
 			begin	
@@ -121,7 +126,7 @@ class Mem_input_monitor extends uvm_monitor;
 					r_p++;			
 				end	
 			else ;
-	endtask
+	endtask*/
 		
 endclass
 
@@ -138,40 +143,3 @@ endclass
         input  #0 m_paddr_o,m_pwdata_o,m_psel_o,m_pwrite_o,m_penable_o,int_o,prstn_i;
         input  #0 m_pready_i,m_prdata_i;
 	endclocking*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
