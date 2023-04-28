@@ -1,4 +1,3 @@
-//================================================Test Class======================================================//
 
 class Base_Test extends uvm_test;
 
@@ -28,6 +27,7 @@ class Base_Test extends uvm_test;
 	virtual	function void end_of_elaboration_phase(uvm_phase phase);
 		uvm_top.print_topology();
 	endfunction
+
 	task run_phase(uvm_phase phase);
 		super.run_phase(phase);
 	endtask
