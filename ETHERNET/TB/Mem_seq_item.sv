@@ -16,7 +16,7 @@ class Mem_seq_item extends uvm_sequence_item;
 	bit int_o,prstn_i;
 	
 	//----------- control signals  ----------//
-	rand bit HUGE;
+	rand bit HUGE,PAD;
 	
 	
 	//--------- Payload Information ---------//
@@ -56,37 +56,86 @@ class Mem_seq_item extends uvm_sequence_item;
 	  endfunction
   
   	//----------  Constraints ----------------//
-  	constraint Payload_constraint {
-  			  		             solve paylength before Payload;		//solve length before
-  									if(!HUGE){
-		  								if(mode == READ){
-		  									paylength inside {[46:1500]};		//Min to Max payload length TXBD LENGTH
-		  									Payload.size() inside {paylength};	//Setting length to payload
-// queue randomize
-foreach(Payload[i])
-Payload[i]==i%255;
-		  								}
-		  								else paylength inside {[64:1518],20};  		//RXBD LENGTH				
-  									}
-  									}
+constraint Payload_constraint {
+
+        solve paylength before Payload;		//solve length before
+
+		if(!HUGE)	{//with out huge
+			if(!PAD)	{//normal - no pad, no hugen
+			
+				if(mode == READ){
+					paylength inside {[46:1500]};		//Min to Max payload length TXBD LENGTH
+					Payload.size() inside {paylength};	//Setting length to payload
+					// queue randomize
+					foreach(Payload[i])
+					Payload[i]==i%255;
+				}
+				else paylength inside {[64:1518]};  		//RXBD LENGTH				
+				}
+				
+			else	{//pad with no hugen
+			
+				if(mode == READ){
+					paylength inside {[4:1500]};		//Min to Max payload length TXBD LENGTH
+					
+					// queue randomize
+					if(paylength < 46)	{	//if length is less than 46 randomizing queue with length,and padding zeros at end.
+						Payload.size() inside {46};
+						foreach(Payload[i])	{
+							if(i > paylength - 1) Payload[i] == 0;
+							else Payload[i]==i%255;									
+						}
+					}
+					else	{				//randomizing queue with length value.
+						Payload.size() inside {paylength};	
+						foreach(Payload[i])
+						Payload[i]==i%255;
+					}		
+				}
+				else paylength inside {[64:1518]};  		//RXBD LENGTH				
+				}
+		}
+		
+		else	{	//with huge
+			if(!PAD)	{//hugen with no pad
+			
+				if(mode == READ){
+					paylength inside {[46:2000]};		//Min to Max payload length TXBD LENGTH
+					Payload.size() inside {paylength};	//Setting length to payload
+					// queue randomize
+					foreach(Payload[i])
+					Payload[i]==i%255;
+				}
+				else paylength inside {[64:2018]};  		//RXBD LENGTH				
+				}
+				
+			else	{//pad with  hugen
+				
+				if(mode == READ){
+					paylength inside {[4:2000]};		//Min to Max payload length TXBD LENGTH
+					
+					// queue randomize
+					if(paylength < 46)	{	//if length is less than 46 randomizing queue with length,and padding zeros at end.
+						Payload.size() inside {46};
+						foreach(Payload[i])	{
+							if(i > paylength - 1) Payload[i] == 0;
+							else Payload[i]==i%255;									
+						}
+					}
+					else	{				//randomizing queue with length value.
+						Payload.size() inside {paylength};	
+						foreach(Payload[i])
+						Payload[i]==i%255;
+					}		
+				}
+				else paylength inside {[64:2018]};  		//RXBD LENGTH				
+				}
+		}
+
+}//constraint end
+  									
+  									
   	constraint Payload_Multiple4 {
   									soft paylength % 4 == 0;
   									}
-  									
-  /*	constraint Payload_constraint_hugen {
-		  							if(HUGE){	
-		  								if(mode == READ){
-		  									paylength inside {[46:2000]};		//Min to Max payload length TXBD LENGTH
-		  									Payload.size() inside {paylength};	//Setting length to payload
-		  									solve paylength before Payload;		//solve length before queue randomize
-		  								}
-		  								else paylength inside {[64:2018]};  		//RXBD LENGTH					
-  									}
-									}
-									*/
-				
-				
-				
-				
-									
 endclass
