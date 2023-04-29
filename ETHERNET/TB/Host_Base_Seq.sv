@@ -12,8 +12,8 @@ class Base_Seq extends uvm_sequence #(Host_Seq_item);
 	//variables required in address and length calculation
 	int unsigned offset,accumulated_length;
     // LENGTH in BDs
-    bit[16] start_num,end_num;
-    bit equal;
+    bit[16] starting_number,ending_number;
+    bit dont_randomize;
 	// Number of TX_BD_NUMs
     bit [15:0]NO_OF_TX_BDs;
 
@@ -54,15 +54,15 @@ task pre_body();
 endtask
 
 
-virtual task NO_OF_TX_BDs_Configuration(bit[16] start_num=1,end_num=10 ,bit equal=0, ndt all_RD=ONE);
-            if(equal) begin//{
+virtual task NO_OF_TX_BDs_Configuration(bit[16] starting_number=1,ending_number=10,bit dont_randomize=0, ndt all_RD=ONE,all_IRQ=ONE);
+            if(dont_randomize) begin//{
             	std::randomize(NO_OF_TX_BDs) with {   // scope randomization >>>> if you aren't randomizing an object, then this is the call you should be using.
-	    		NO_OF_TX_BDs inside {start_num};
+	    		NO_OF_TX_BDs inside {starting_number};
 	                                                };
             end//}
             else begin//{
             	std::randomize(NO_OF_TX_BDs) with {   // scope randomization >>>> if you aren't randomizing an object, then this is the call you should be using.
-			    NO_OF_TX_BDs inside {[start_num:end_num]};
+			    NO_OF_TX_BDs inside {[starting_number:ending_number]};
                                                 	};
     end//}
 
@@ -71,40 +71,33 @@ virtual task NO_OF_TX_BDs_Configuration(bit[16] start_num=1,end_num=10 ,bit equa
 
                 for(int i=0; i<NO_OF_TX_BDs; i++)
                 begin//{
-                        if(all_RD==ONE)
-                            begin//{
-//                                $display(" one RD=%p",RD_array);
-                                    RD_array[i]=1;
-                            end//}
-                        else if(all_RD==RANDOM)
-                             begin//{
- //                               $display(" RANDOM RD=%p",RD_array);
-                                    RD_array[i]=$urandom_range(0,1);
-                             end//}
-                        else if(all_RD==ZERO)
-                            begin//{
-                                    RD_array[i]=0;
-                            end//}
+						case (all_RD)
+							ONE:begin
+								RD_array[i]=1;
+							end 
+							RANDOM: begin
+								RD_array[i]=$urandom_range(0,1);
+							end
+							ZERO: begin
+								RD_array[i]=0;
+							end
+						endcase
                 end//}
-                
                 for(int i=0; i<NO_OF_TX_BDs; i++)
                 begin//{
-                        if(all_IRQ==ONE)
-                            begin//{
-                                    IRQ_array[i]=1;
-                            end//}
-                        else if(all_IRQ==RANDOM)
-                             begin//{
-                                    IRQ_array[i]=$urandom_range(0,1);                                    
-                             end//}
-                        else if(all_IRQ==ZERO)
-                            begin//{
-                                    RD_array[i]=0;
-                                    IRQ_array[i]=0;
-                            end//}
-                end//}                
-                
-                
+						case (all_IRQ)
+							ONE:begin
+								IRQ_array[i]=1;
+							end 
+							RANDOM: begin
+								IRQ_array[i]=$urandom_range(0,1);                                    
+							end
+							ZERO: begin
+								IRQ_array[i]=0;
+							end
+						endcase
+                end//}
+				
 
 endtask
 
@@ -143,14 +136,13 @@ endtask
 	endtask
 
 
-	virtual task TXBDs_offset(RD=1,IRQ=0);
+	virtual task TXBDs_offset( bit RD=1,IRQ=0);
     int unsigned rem,LEN;
 			start_item(req);
-//			$display("======================================================================seq in host   LEN=%0d",LEN);
 			assert (req.randomize() with {paddr_i==(offset*4)+'h400; pwdata_i[15:0]=={RD,IRQ,14'b0};});   // random data is going
             LEN=req.pwdata_i[32:16];
 			offset++;
-			uvm_report_info (get_type_name (), $sformatf ("\n\t\t\t\t\t^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^paddr_i=%h  offset =%0d ",req.paddr_i,offset), UVM_FULL);
+		//	uvm_report_info (get_type_name (), $sformatf ("\n\t\t\t\t\t^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^paddr_i=%h  offset =%0d ",req.paddr_i,offset), UVM_FULL);
 			finish_item(req);
 			TXBDs_offset_p_4(accumulated_length);
             if(LEN%4==0)
@@ -227,5 +219,5 @@ endtask
 		accumulated_length=0;
 	endtask
 
-endclass
 
+endclass
