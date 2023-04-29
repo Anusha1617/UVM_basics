@@ -28,15 +28,6 @@ class Host_Driver extends uvm_driver #(Host_Seq_item);
 	
 	task drive;
 	//-------------- IDLE state or RESET state ---------------------//
-		/*@(vintf.host_cb_driver)
-			vintf.host_cb_driver.penable_i<=0;
-			vintf.host_cb_driver.psel_i<=0;
-			vintf.host_cb_driver.pwrite_i<=0;
-			vintf.host_cb_driver.pwdata_i<=0;
-			vintf.host_cb_driver.paddr_i<=0;
-			vintf.host_cb_driver.prstn_i<=0;
-			task_reset;
-			*/
 		forever  //@(vintf.host_cb_driver)
 		@(vintf.host_cb_driver)
 		begin
@@ -45,6 +36,7 @@ class Host_Driver extends uvm_driver #(Host_Seq_item);
 		if(!req.prstn_i) 
             begin
              vintf.host_cb_driver.prstn_i<=0;
+             task_reset;
 		     @(vintf.host_cb_driver);
         end
 		
@@ -60,19 +52,12 @@ class Host_Driver extends uvm_driver #(Host_Seq_item);
 				
 				@(vintf.host_cb_driver);		//access state  s=1 e=1
 				vintf.host_cb_driver.penable_i<=1;
-				
-		        
 				wait(vintf.pready_o)
 					task_write;   //config updates     
 		            	#1;  
 				@(vintf.host_cb_driver)		//acess state  s=1 e=1						
 			 	vintf.host_cb_driver.penable_i<=0;
-				
-				
-				 
 			end
-			 
-			    
 			else 	begin 
 				vintf.host_cb_driver.prstn_i<=1;
 				vintf.host_cb_driver.psel_i<=1;		//Setup stae s=1 e=0
@@ -87,35 +72,6 @@ class Host_Driver extends uvm_driver #(Host_Seq_item);
 		
 		end
 		endtask
-    task drive_int_source;
-    forever begin
-    //@(vintf.host_cb_driver)
-    		 wait(vintf.int_o==1)
-    		seq_item_port.get_next_item(req);	//randomisation takes place
-    @(vintf.host_cb_driver)
-     		 
-    			vintf.host_cb_driver.prstn_i<=1;
-    			vintf.host_cb_driver.psel_i<=1;		//Setup stae s=1 e=0
-    			vintf.host_cb_driver.penable_i<=0;			
-    			vintf.host_cb_driver.pwrite_i<=1;
-    			vintf.host_cb_driver.paddr_i<='h04;
-    			vintf.host_cb_driver.pwdata_i<=req.pwdata_i;
-    			
-    			@(vintf.host_cb_driver);		//access state  s=1 e=1
-    			vintf.host_cb_driver.penable_i<=1;
-    			
-    				wait(vintf.pready_o);
-    				                            @(vintf.host_cb_driver);		//acess state  s=1 e=1						
-    			vintf.host_cb_driver.psel_i<=0;		//Setup stae s=1 e=0
-    			vintf.host_cb_driver.penable_i<=0;						
-    		
-    		seq_item_port.item_done();
-    end
-    			
-    endtask	
-	
-	
-	
 
     task task_reset;
     	if(!vintf.prstn_i) // reset_n==0 active low reset
