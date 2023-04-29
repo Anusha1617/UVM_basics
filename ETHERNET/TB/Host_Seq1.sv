@@ -1,6 +1,13 @@
 //-------------------------------------------------------------------------------------//
-// Drop frame(Transmission with len<MINFL,No pad)   IRQ=0
-//-------------------------------------------------------------------------------------//
+/*		TXEN=1 RXEN=0	
+		PAD=0   HUGEN=0 // LEN give in constraint
+	1. LEN [4:46]
+  	2. LEN [0:3]
+    3. LEN [46:1500]
+    4. LEN>1500
+    5. LEN>2000
+	*/
+  //-------------------------------------------------------------------------------------//
 
 class Host_Seq1 extends  Base_Seq;
     // extends from the Base_Seq
@@ -15,22 +22,25 @@ class Host_Seq1 extends  Base_Seq;
 // see the Base_Seq(parent) sequence to know the tasks prototype
 	task body;
 	
-     RESET(); 
-// 1.NO_OF_TX_BDs_Configuration ,
-   	 start_num=2;
-   	 end_num=128;
-	    equal=1;
-  	  all_RD=ONE;   // rd configuration
-  	  all_IRQ=ONE;
+     RESET(); // only for sequence 1
+
+// TXBD NUM range
+   	 starting_number=1;   
+   	 ending_number=128;  
+	  //  dont_randomize=1;   // it doesnot randomize the TXBDNUM takes [TXBDNUM = starting_number] 
+  	 	dont_randomize=0;   // it will randomize the TXBDNUM in the given range
+		
+	  all_RD=ONE;   // all_rd=ONE,RANDOM,ZERO
+  	  all_IRQ=ONE;  // all_IRQ=ONE,RANDOM,ZERO
   	  
-	 NO_OF_TX_BDs_Configuration(start_num,end_num,equal,all_RD);
+	 NO_OF_TX_BDs_Configuration(starting_number,ending_number,dont_randomize,all_RD,all_IRQ);
 	
 	 MAC_ADDR0_CONFIGURATION();
 	 MAC_ADDR1_CONFIGURATION();
 	 MIIADDRESS_CONFIGURATION();
 	
 	 TX_BD_NUM_CONFIGURATION(NO_OF_TX_BDs);    
-	 TXBDs_CONFIGURATION();  		// length is randomized in the seq item use makefile
+	 TXBDs_CONFIGURATION();  		
 	 
 // INT MASK Fields
         RXE_M=1; RXF_M=1; TXE_M=1; TXB_M=1; 
