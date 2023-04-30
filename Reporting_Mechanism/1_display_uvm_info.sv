@@ -18,6 +18,7 @@ module tb;
      $display("Hello World with Display");
   end
 endmodule
-
+-------------------------------------------------------------
 # UVM_INFO top.sv(17) @ 50: reporter [TB_TOP] Hello World
 # Hello World with Display
+-------------------------------------------------------------
