@@ -15,8 +15,7 @@ int data = 56;
   end
 endmodule
 
-//-------------------------------------------------------------------------//
-
+-------------------------------------------------------------------------
 typedef enum {
    UVM_NONE    = 0,
    UVM_LOW     = 100,
@@ -25,7 +24,7 @@ typedef enum {
    UVM_FULL    = 400,
    UVM_DEBUG   = 500
 } uvm_verbosity;
-
-
+-------------------------------------------------------------------------
 #UVM_INFO top.sv(10) @ 0: reporter [TB_TOP] UVM_NONE verbosity Value of data : 56
 # UVM_INFO top.sv(11) @ 0: reporter [TB_TOP] 199 verbosity Value of data : 56
+-------------------------------------------------------------------------
